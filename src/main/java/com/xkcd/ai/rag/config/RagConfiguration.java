@@ -1,17 +1,17 @@
 package com.xkcd.ai.rag.config;
 
-import org.springframework.ai.client.AiClient;
+import com.xkcd.ai.rag.RagService;
+import org.springframework.ai.chat.ChatClient;
 import org.springframework.ai.embedding.EmbeddingClient;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import com.xkcd.ai.rag.RagService;
 
 @Configuration
 public class RagConfiguration {
 
     @Bean
-    public RagService ragService(AiClient aiClient, EmbeddingClient embeddingClient) {
-        return new RagService(aiClient, embeddingClient);
+    public RagService ragService(ChatClient chatClient, EmbeddingClient embeddingClient) {
+        return new RagService(chatClient, embeddingClient);
     }
 
 }

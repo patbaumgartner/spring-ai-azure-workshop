@@ -1,6 +1,7 @@
 package com.xkcd.ai.rag;
 
-import org.springframework.ai.client.Generation;
+import org.springframework.ai.chat.Generation;
+import org.springframework.ai.chat.messages.AssistantMessage;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -17,7 +18,7 @@ public class RagController {
     }
 
     @GetMapping("/ai/rag")
-    public Generation generate(@RequestParam(value = "message", defaultValue = "What bike is good for city commuting?") String message) {
+    public AssistantMessage generate(@RequestParam(value = "message", defaultValue = "What bike is good for city commuting?") String message) {
         return ragService.retrieve(message);
     }
 }

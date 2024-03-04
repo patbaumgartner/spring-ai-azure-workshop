@@ -1,4 +1,4 @@
-# Spring AI - Retrieval Augmented Generation
+    # Spring AI - Retrieval Augmented Generation
 
 The code for this example is in the package `com.xkcd.ai.rag`.
 
@@ -23,15 +23,15 @@ The steps of processing are
 ### Load the documents
 
 ```java
-        JsonLoader jsonLoader = new JsonLoader(bikesResource,
+        JsonReader jsonReader = new JsonReader(bikesResource,
                 "name", "price", "shortDescription", "description");
-        List<Document> documents = jsonLoader.load();
+        List<Document> documents = jsonReader.get();
 ```
 
 Create embeddings for the documents.  This calls the Azure OpenAI embedding endpoint.
 
 ```java
-        VectorStore vectorStore = new InMemoryVectorStore(embeddingClient);
+        VectorStore vectorStore = new SimpleVectorStore(embeddingClient);
         vectorStore.add(documents);
 ```
 ### Find documents similar to the query
@@ -53,7 +53,7 @@ The `Prompt` is created from a System message and a User message.  The System me
 ### Get the response
 
 ```java
-        AiResponse response = aiClient.generate(prompt);
+        ChatResponse chatResponse = chatClient.call(prompt);
 ```
 
 The response to the request is from the Azure OpenAI Service.

@@ -1,11 +1,13 @@
 package com.xkcd.ai.roles;
 
-import org.springframework.ai.client.AiClient;
-import org.springframework.ai.client.Generation;
-import org.springframework.ai.prompt.Prompt;
-import org.springframework.ai.prompt.SystemPromptTemplate;
-import org.springframework.ai.prompt.messages.Message;
-import org.springframework.ai.prompt.messages.UserMessage;
+import org.springframework.ai.chat.ChatClient;
+import org.springframework.ai.chat.Generation;
+import org.springframework.ai.chat.messages.AbstractMessage;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.messages.Message;
+import org.springframework.ai.chat.messages.UserMessage;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.chat.prompt.SystemPromptTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -19,19 +21,19 @@ import java.util.Map;
 @RestController
 public class RoleController {
 
-    private final AiClient aiClient;
+    private final ChatClient chatClient;
 
     @Value("classpath:/prompts/system-message.st")
     private Resource systemResource;
 
 
     @Autowired
-    public RoleController(AiClient aiClient) {
-        this.aiClient = aiClient;
+    public RoleController(ChatClient chatClient) {
+        this.chatClient = chatClient;
     }
 
     @GetMapping("/ai/roles")
-    public List<Generation> generate(
+    public AssistantMessage generate(
             @RequestParam(value = "message", defaultValue = "Tell me about three famous pirates from the Golden Age of Piracy and why they did.  Write at least a sentence for each pirate.") String message,
             @RequestParam(value = "name", defaultValue = "Bob") String name,
             @RequestParam(value = "voice", defaultValue = "pirate") String voice) {
@@ -39,7 +41,6 @@ public class RoleController {
         SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(systemResource);
         Message systemMessage = systemPromptTemplate.createMessage(Map.of("name", name, "voice", voice));
         Prompt prompt = new Prompt(List.of(userMessage, systemMessage));
-        List<Generation> response = aiClient.generate(prompt).getGenerations();
-        return response;
+        return chatClient.call(prompt).getResult().getOutput();
     }
 }

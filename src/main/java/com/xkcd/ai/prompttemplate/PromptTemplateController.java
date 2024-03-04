@@ -1,9 +1,9 @@
 package com.xkcd.ai.prompttemplate;
 
-import org.springframework.ai.client.AiClient;
-import org.springframework.ai.client.Generation;
-import org.springframework.ai.prompt.Prompt;
-import org.springframework.ai.prompt.PromptTemplate;
+import org.springframework.ai.chat.ChatClient;
+import org.springframework.ai.chat.messages.AssistantMessage;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -16,25 +16,22 @@ import java.util.Map;
 @RestController
 public class PromptTemplateController {
 
-    private final AiClient aiClient;
+    private final ChatClient chatClient;
 
     @Value("classpath:/prompts/joke-prompt.st")
     private Resource jokeResource;
 
 
     @Autowired
-    public PromptTemplateController(AiClient aiClient) {
-        this.aiClient = aiClient;
+    public PromptTemplateController(ChatClient chatClient) {
+        this.chatClient = chatClient;
     }
 
     @GetMapping("/ai/prompt")
-    public Generation completion(@RequestParam(value = "adjective", defaultValue = "funny") String adjective,
-                                 @RequestParam(value = "topic", defaultValue = "cows") String topic) {
-
+    public AssistantMessage completion(@RequestParam(value = "adjective", defaultValue = "funny") String adjective,
+                                       @RequestParam(value = "topic", defaultValue = "cows") String topic) {
         PromptTemplate promptTemplate = new PromptTemplate(jokeResource);
-
         Prompt prompt = promptTemplate.create(Map.of("adjective", adjective, "topic", topic));
-
-        return aiClient.generate(prompt).getGeneration();
+        return chatClient.call(prompt).getResult().getOutput();
     }
 }

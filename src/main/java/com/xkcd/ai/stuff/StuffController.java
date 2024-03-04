@@ -1,9 +1,9 @@
 package com.xkcd.ai.stuff;
 
-import org.springframework.ai.client.AiClient;
-import org.springframework.ai.client.AiResponse;
-import org.springframework.ai.prompt.Prompt;
-import org.springframework.ai.prompt.PromptTemplate;
+import org.springframework.ai.chat.ChatClient;
+import org.springframework.ai.chat.Generation;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
@@ -17,7 +17,7 @@ import java.util.Map;
 @RestController
 public class StuffController {
 
-    private final AiClient aiClient;
+    private final ChatClient chatClient;
 
     @Value("classpath:/docs/wikipedia-curling.md")
     private Resource docsToStuffResource;
@@ -26,8 +26,8 @@ public class StuffController {
     private Resource qaPromptResource;
 
     @Autowired
-    public StuffController(AiClient aiClient) {
-        this.aiClient = aiClient;
+    public StuffController(ChatClient chatClient) {
+        this.chatClient = chatClient;
     }
 
     @GetMapping("/ai/stuff")
@@ -42,8 +42,8 @@ public class StuffController {
             map.put("context", "");
         }
         Prompt prompt = promptTemplate.create(map);
-        AiResponse aiResponse = aiClient.generate(prompt);
-        return new Completion(aiResponse.getGeneration().getText());
+        Generation generation = chatClient.call(prompt).getResult();
+        return new Completion(generation.getOutput().getContent());
     }
 
 }

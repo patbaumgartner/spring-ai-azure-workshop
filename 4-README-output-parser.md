@@ -31,7 +31,7 @@ String format = outputParser.getFormat();
 The response from the Azure OpenAI Service is then parsed into the class `ActorsFilms`
 
 ```java
-ActorsFilms actorsFilms = outputParser.parse(generation.getText());
+ActorsFilms actorsFilms = outputParser.parse(generation.getOutput().getContent());
 ```
 
 ## Building and running

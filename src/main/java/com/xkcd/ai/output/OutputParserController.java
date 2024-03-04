@@ -1,10 +1,12 @@
 package com.xkcd.ai.output;
 
-import org.springframework.ai.client.AiClient;
-import org.springframework.ai.client.Generation;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.ai.chat.ChatClient;
+import org.springframework.ai.chat.Generation;
+import org.springframework.ai.chat.prompt.Prompt;
+import org.springframework.ai.chat.prompt.PromptTemplate;
 import org.springframework.ai.parser.BeanOutputParser;
-import org.springframework.ai.prompt.Prompt;
-import org.springframework.ai.prompt.PromptTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -15,11 +17,13 @@ import java.util.Map;
 @RestController
 public class OutputParserController {
 
-    private final AiClient aiClient;
+    private static final Logger logger = LoggerFactory.getLogger(OutputParserController.class);
+
+    private final ChatClient chatClient;
 
     @Autowired
-    public OutputParserController(AiClient aiClient) {
-        this.aiClient = aiClient;
+    public OutputParserController(ChatClient chatClient) {
+        this.chatClient = chatClient;
     }
 
     @GetMapping("/ai/output")
@@ -27,16 +31,15 @@ public class OutputParserController {
         var outputParser = new BeanOutputParser<>(ActorsFilms.class);
 
         String format = outputParser.getFormat();
-        System.out.println("format: " + format);
+        logger.info("format: " + format);
         String userMessage = """
 				Generate the filmography for the actor {actor}.
 				{format}
 				""";
         PromptTemplate promptTemplate = new PromptTemplate(userMessage, Map.of("actor", actor, "format", format));
         Prompt prompt = promptTemplate.create();
-        Generation generation = aiClient.generate(prompt).getGeneration();
+        Generation generation = chatClient.call(prompt).getResult();
 
-        ActorsFilms actorsFilms = outputParser.parse(generation.getText());
-        return actorsFilms;
+       return outputParser.parse(generation.getOutput().getContent());
     }
 }
