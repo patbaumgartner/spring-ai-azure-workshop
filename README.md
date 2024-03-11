@@ -1,4 +1,4 @@
-# Spring AI Workshop
+# Spring AI Workshop for Azure
 
 ## Prerequisites
 
@@ -9,12 +9,12 @@ export SPRING_AI_AZURE_OPENAI_API_KEY=<INSERT KEY HERE>
 export SPRING_AI_AZURE_OPENAI_ENDPOINT=<INSERT ENDPOINT URL HERE>
 ```
 
-### Azure AI Deployments
+### Create Azure AI Deployments
 
 The configuration assumes you have already created deployments of the following names in the Azure OpenAI Studio
 
-* Deployment Name: `gpt-35-turbo-16k` with the model name `gpt-35-turbo-16k`
-* Deployment Name: `text-embedding-ada-002` with the model name `text-embedding-ada-002`
+* Deployment Name: `gpt-35-turbo-16k` with the model `gpt-35-turbo-16k`
+* Deployment Name: `text-embedding-ada-002` with the model `text-embedding-ada-002`
 
 NOTE: Spring configuration properties currently use the property-name `model` instead of `deployment-name` so don't get confused.  Spring AI will be renaming the property in the future to avoid confusion.  See [here](https://docs.spring.io/spring-ai/reference/api/clients/azure-openai-chat.html#_deployment_name) for more information.
 
