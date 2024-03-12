@@ -17,33 +17,35 @@ import java.util.Map;
 @RestController
 public class StuffController {
 
-    private final ChatClient chatClient;
+	private final ChatClient chatClient;
 
-    @Value("classpath:/docs/wikipedia-curling.md")
-    private Resource docsToStuffResource;
+	@Value("classpath:/docs/wikipedia-curling.md")
+	private Resource docsToStuffResource;
 
-    @Value("classpath:/prompts/qa-prompt.st")
-    private Resource qaPromptResource;
+	@Value("classpath:/prompts/qa-prompt.st")
+	private Resource qaPromptResource;
 
-    @Autowired
-    public StuffController(ChatClient chatClient) {
-        this.chatClient = chatClient;
-    }
+	@Autowired
+	public StuffController(ChatClient chatClient) {
+		this.chatClient = chatClient;
+	}
 
-    @GetMapping("/ai/stuff")
-    public Completion completion(@RequestParam(value = "message", defaultValue = "Which athletes won the mixed doubles gold medal in curling at the 2022 Winter Olympics?'") String message,
-                                 @RequestParam(value = "stuffit", defaultValue = "false") boolean stuffit) {
-        PromptTemplate promptTemplate = new PromptTemplate(qaPromptResource);
-        Map<String, Object> map = new HashMap<>();
-        map.put("question", message);
-        if (stuffit) {
-            map.put("context", docsToStuffResource);
-        } else {
-            map.put("context", "");
-        }
-        Prompt prompt = promptTemplate.create(map);
-        Generation generation = chatClient.call(prompt).getResult();
-        return new Completion(generation.getOutput().getContent());
-    }
+	@GetMapping("/ai/stuff")
+	public Completion completion(@RequestParam(value = "message",
+			defaultValue = "Which athletes won the mixed doubles gold medal in curling at the 2022 Winter Olympics?'") String message,
+			@RequestParam(value = "stuffit", defaultValue = "false") boolean stuffit) {
+		PromptTemplate promptTemplate = new PromptTemplate(qaPromptResource);
+		Map<String, Object> map = new HashMap<>();
+		map.put("question", message);
+		if (stuffit) {
+			map.put("context", docsToStuffResource);
+		}
+		else {
+			map.put("context", "");
+		}
+		Prompt prompt = promptTemplate.create(map);
+		Generation generation = chatClient.call(prompt).getResult();
+		return new Completion(generation.getOutput().getContent());
+	}
 
 }

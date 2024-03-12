@@ -11,15 +11,17 @@ import java.util.Map;
 @RestController
 public class SimpleAiController {
 
-    private final ChatClient chatClient;
+	private final ChatClient chatClient;
 
-    @Autowired
-    public SimpleAiController(ChatClient chatClient) {
-        this.chatClient = chatClient;
-    }
+	@Autowired
+	public SimpleAiController(ChatClient chatClient) {
+		this.chatClient = chatClient;
+	}
 
-    @GetMapping("/ai/simple")
-    public Map<String, String> generation(@RequestParam(value = "message", defaultValue = "Tell me a joke") String message) {
-        return Map.of("generation", chatClient.call(message));
-    }
+	@GetMapping("/ai/simple")
+	public Map<String, String> generation(
+			@RequestParam(value = "message", defaultValue = "Tell me a joke") String message) {
+		return Map.of("generation", chatClient.call(message));
+	}
+
 }

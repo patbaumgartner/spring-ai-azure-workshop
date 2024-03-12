@@ -21,26 +21,26 @@ import java.util.Map;
 @RestController
 public class RoleController {
 
-    private final ChatClient chatClient;
+	private final ChatClient chatClient;
 
-    @Value("classpath:/prompts/system-message.st")
-    private Resource systemResource;
+	@Value("classpath:/prompts/system-message.st")
+	private Resource systemResource;
 
+	@Autowired
+	public RoleController(ChatClient chatClient) {
+		this.chatClient = chatClient;
+	}
 
-    @Autowired
-    public RoleController(ChatClient chatClient) {
-        this.chatClient = chatClient;
-    }
+	@GetMapping("/ai/roles")
+	public AssistantMessage generate(@RequestParam(value = "message",
+			defaultValue = "Tell me about three famous pirates from the Golden Age of Piracy and why they did.  Write at least a sentence for each pirate.") String message,
+			@RequestParam(value = "name", defaultValue = "Bob") String name,
+			@RequestParam(value = "voice", defaultValue = "pirate") String voice) {
+		UserMessage userMessage = new UserMessage(message);
+		SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(systemResource);
+		Message systemMessage = systemPromptTemplate.createMessage(Map.of("name", name, "voice", voice));
+		Prompt prompt = new Prompt(List.of(userMessage, systemMessage));
+		return chatClient.call(prompt).getResult().getOutput();
+	}
 
-    @GetMapping("/ai/roles")
-    public AssistantMessage generate(
-            @RequestParam(value = "message", defaultValue = "Tell me about three famous pirates from the Golden Age of Piracy and why they did.  Write at least a sentence for each pirate.") String message,
-            @RequestParam(value = "name", defaultValue = "Bob") String name,
-            @RequestParam(value = "voice", defaultValue = "pirate") String voice) {
-        UserMessage userMessage = new UserMessage(message);
-        SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(systemResource);
-        Message systemMessage = systemPromptTemplate.createMessage(Map.of("name", name, "voice", voice));
-        Prompt prompt = new Prompt(List.of(userMessage, systemMessage));
-        return chatClient.call(prompt).getResult().getOutput();
-    }
 }

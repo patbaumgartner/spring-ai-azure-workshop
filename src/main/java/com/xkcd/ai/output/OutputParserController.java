@@ -17,29 +17,30 @@ import java.util.Map;
 @RestController
 public class OutputParserController {
 
-    private static final Logger logger = LoggerFactory.getLogger(OutputParserController.class);
+	private static final Logger logger = LoggerFactory.getLogger(OutputParserController.class);
 
-    private final ChatClient chatClient;
+	private final ChatClient chatClient;
 
-    @Autowired
-    public OutputParserController(ChatClient chatClient) {
-        this.chatClient = chatClient;
-    }
+	@Autowired
+	public OutputParserController(ChatClient chatClient) {
+		this.chatClient = chatClient;
+	}
 
-    @GetMapping("/ai/output")
-    public ActorsFilms generate(@RequestParam(value = "actor", defaultValue = "Jeff Bridges") String actor) {
-        var outputParser = new BeanOutputParser<>(ActorsFilms.class);
+	@GetMapping("/ai/output")
+	public ActorsFilms generate(@RequestParam(value = "actor", defaultValue = "Jeff Bridges") String actor) {
+		var outputParser = new BeanOutputParser<>(ActorsFilms.class);
 
-        String format = outputParser.getFormat();
-        logger.info("format: " + format);
-        String userMessage = """
+		String format = outputParser.getFormat();
+		logger.info("format: " + format);
+		String userMessage = """
 				Generate the filmography for the actor {actor}.
 				{format}
 				""";
-        PromptTemplate promptTemplate = new PromptTemplate(userMessage, Map.of("actor", actor, "format", format));
-        Prompt prompt = promptTemplate.create();
-        Generation generation = chatClient.call(prompt).getResult();
+		PromptTemplate promptTemplate = new PromptTemplate(userMessage, Map.of("actor", actor, "format", format));
+		Prompt prompt = promptTemplate.create();
+		Generation generation = chatClient.call(prompt).getResult();
 
-       return outputParser.parse(generation.getOutput().getContent());
-    }
+		return outputParser.parse(generation.getOutput().getContent());
+	}
+
 }

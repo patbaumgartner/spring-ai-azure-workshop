@@ -16,22 +16,22 @@ import java.util.Map;
 @RestController
 public class PromptTemplateController {
 
-    private final ChatClient chatClient;
+	private final ChatClient chatClient;
 
-    @Value("classpath:/prompts/joke-prompt.st")
-    private Resource jokeResource;
+	@Value("classpath:/prompts/joke-prompt.st")
+	private Resource jokeResource;
 
+	@Autowired
+	public PromptTemplateController(ChatClient chatClient) {
+		this.chatClient = chatClient;
+	}
 
-    @Autowired
-    public PromptTemplateController(ChatClient chatClient) {
-        this.chatClient = chatClient;
-    }
+	@GetMapping("/ai/prompt")
+	public AssistantMessage completion(@RequestParam(value = "adjective", defaultValue = "funny") String adjective,
+			@RequestParam(value = "topic", defaultValue = "cows") String topic) {
+		PromptTemplate promptTemplate = new PromptTemplate(jokeResource);
+		Prompt prompt = promptTemplate.create(Map.of("adjective", adjective, "topic", topic));
+		return chatClient.call(prompt).getResult().getOutput();
+	}
 
-    @GetMapping("/ai/prompt")
-    public AssistantMessage completion(@RequestParam(value = "adjective", defaultValue = "funny") String adjective,
-                                       @RequestParam(value = "topic", defaultValue = "cows") String topic) {
-        PromptTemplate promptTemplate = new PromptTemplate(jokeResource);
-        Prompt prompt = promptTemplate.create(Map.of("adjective", adjective, "topic", topic));
-        return chatClient.call(prompt).getResult().getOutput();
-    }
 }

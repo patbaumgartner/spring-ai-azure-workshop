@@ -24,67 +24,69 @@ import java.util.stream.Collectors;
 
 public class RagService {
 
-    private static final Logger logger = LoggerFactory.getLogger(RagService.class);
+	private static final Logger logger = LoggerFactory.getLogger(RagService.class);
 
-    @Value("classpath:/data/bikes.json")
-    private Resource bikesResource;
+	@Value("classpath:/data/bikes.json")
+	private Resource bikesResource;
 
-    @Value("classpath:/prompts/system-qa.st")
-    private Resource systemBikePrompt;
+	@Value("classpath:/prompts/system-qa.st")
+	private Resource systemBikePrompt;
 
-    private final ChatClient chatClient;
-    private final EmbeddingClient embeddingClient;
+	private final ChatClient chatClient;
 
-    public RagService(ChatClient chatClient, EmbeddingClient embeddingClient) {
-        this.chatClient = chatClient;
-        this.embeddingClient = embeddingClient;
-    }
+	private final EmbeddingClient embeddingClient;
 
-    public AssistantMessage retrieve(String message) {
+	public RagService(ChatClient chatClient, EmbeddingClient embeddingClient) {
+		this.chatClient = chatClient;
+		this.embeddingClient = embeddingClient;
+	}
 
-        // Step 1 - Load JSON document as Documents
+	public AssistantMessage retrieve(String message) {
 
-        logger.info("Loading JSON as Documents");
-        JsonReader jsonReader = new JsonReader(bikesResource,
-                "name", "price", "shortDescription", "description");
-        List<Document> documents = jsonReader.get();
-        logger.info("Loading JSON as Documents");
+		// Step 1 - Load JSON document as Documents
 
-        // Step 2 - Create embeddings and save to vector store
+		logger.info("Loading JSON as Documents");
+		JsonReader jsonReader = new JsonReader(bikesResource, "name", "price", "shortDescription", "description");
+		List<Document> documents = jsonReader.get();
+		logger.info("Loading JSON as Documents");
 
-        logger.info("Creating Embeddings...");
-        VectorStore vectorStore = new SimpleVectorStore(embeddingClient);
-        vectorStore.add(documents);
-        logger.info("Embeddings created.");
+		// Step 2 - Create embeddings and save to vector store
 
-        // Step 3 retrieve related documents to query
-        logger.info("Retrieving relevant documents");
-        List<Document> similarDocuments = vectorStore.similaritySearch(message);
-        logger.info(String.format("Found %s relevant documents.", similarDocuments.size()));
+		logger.info("Creating Embeddings...");
+		VectorStore vectorStore = new SimpleVectorStore(embeddingClient);
+		vectorStore.add(documents);
+		logger.info("Embeddings created.");
 
-        // Step 4 Embed documents into SystemMessage with the `system-qa.st` prompt template
-        Message systemMessage = getSystemMessage(similarDocuments);
-        UserMessage userMessage = new UserMessage(message);
+		// Step 3 retrieve related documents to query
+		logger.info("Retrieving relevant documents");
+		List<Document> similarDocuments = vectorStore.similaritySearch(message);
+		logger.info(String.format("Found %s relevant documents.", similarDocuments.size()));
 
-        // Step 4 - Ask the AI model
+		// Step 4 Embed documents into SystemMessage with the `system-qa.st` prompt
+		// template
+		Message systemMessage = getSystemMessage(similarDocuments);
+		UserMessage userMessage = new UserMessage(message);
 
-        logger.info("Asking AI model to reply to question.");
-        Prompt prompt = new Prompt(List.of(systemMessage, userMessage));
-        logger.info(prompt.toString());
+		// Step 4 - Ask the AI model
 
-        ChatResponse chatResponse = chatClient.call(prompt);
-        logger.info("AI responded.");
+		logger.info("Asking AI model to reply to question.");
+		Prompt prompt = new Prompt(List.of(systemMessage, userMessage));
+		logger.info(prompt.toString());
 
-        logger.info(chatResponse.getResult().getOutput().getContent());
-        return chatResponse.getResult().getOutput();
-    }
+		ChatResponse chatResponse = chatClient.call(prompt);
+		logger.info("AI responded.");
 
-    private Message getSystemMessage(List<Document> similarDocuments) {
+		logger.info(chatResponse.getResult().getOutput().getContent());
+		return chatResponse.getResult().getOutput();
+	}
 
-        String documents = similarDocuments.stream().map(entry -> entry.getContent()).collect(Collectors.joining("\n"));
-        SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(systemBikePrompt);
-        Message systemMessage = systemPromptTemplate.createMessage(Map.of("documents", documents));
-        return systemMessage;
+	private Message getSystemMessage(List<Document> similarDocuments) {
 
-    }
+		String documents = similarDocuments.stream().map(entry -> entry.getContent()).collect(Collectors.joining("\n"));
+		SystemPromptTemplate systemPromptTemplate = new SystemPromptTemplate(systemBikePrompt);
+		Message systemMessage = systemPromptTemplate.createMessage(Map.of("documents", documents));
+		return systemMessage;
+
+	}
+
 }

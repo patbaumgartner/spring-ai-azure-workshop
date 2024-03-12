@@ -10,15 +10,17 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class RagController {
 
-    private final RagService ragService;
+	private final RagService ragService;
 
-    @Autowired
-    public RagController(RagService ragService) {
-        this.ragService = ragService;
-    }
+	@Autowired
+	public RagController(RagService ragService) {
+		this.ragService = ragService;
+	}
 
-    @GetMapping("/ai/rag")
-    public AssistantMessage generate(@RequestParam(value = "message", defaultValue = "What bike is good for city commuting?") String message) {
-        return ragService.retrieve(message);
-    }
+	@GetMapping("/ai/rag")
+	public AssistantMessage generate(
+			@RequestParam(value = "message", defaultValue = "What bike is good for city commuting?") String message) {
+		return ragService.retrieve(message);
+	}
+
 }

@@ -9,9 +9,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class RagConfiguration {
 
-    @Bean
-    public RagService ragService(ChatClient chatClient, EmbeddingClient embeddingClient) {
-        return new RagService(chatClient, embeddingClient);
-    }
+	@Bean
+	public RagService ragService(ChatClient chatClient, EmbeddingClient embeddingClient) {
+		return new RagService(chatClient, embeddingClient);
+	}
 
 }
